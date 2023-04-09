@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Vector3 } from 'three'
 
@@ -34,14 +34,16 @@ function AnimateCamera() {
     x: 0,
     y: 0,
   }
+  const camera = useThree(state => state.camera);
+  const originalCameraQuaternion = camera.quaternion;
+
   useEffect(() => {
-    window.m = mouse;
     const mouseMoveListener = (e) => {
       const { innerWidth, innerHeight } = window;
       const { clientX, clientY } = e;
       /* Normalize the values to be [-0.5..0.5] */
-      const mouseX = (clientX / innerWidth) - 1;
-      const mouseY = ((clientY / innerHeight) - 1) * -1;
+      const mouseX = (clientX / innerWidth) - 0.5;
+      const mouseY = ((clientY / innerHeight) - 0.5) * -1;
       mouse.x = mouseX;
       mouse.y = mouseY;
     }
@@ -54,7 +56,7 @@ function AnimateCamera() {
 
   useFrame((state) => {
     const lookAt = new Vector3(0, 0, -1);
-    lookAt.applyQuaternion(state.camera.quaternion);
+    lookAt.applyQuaternion(originalCameraQuaternion);
     lookAt.add(new Vector3(mouse.x, mouse.y, 0));
     state.camera.lookAt(lookAt);
   });
